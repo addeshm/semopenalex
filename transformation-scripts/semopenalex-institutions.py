@@ -1,5 +1,11 @@
 # Copyright Johan Krause, Michael Färber, David Lamprecht; Institute AIFB, Karlsruhe Institute of Technology (KIT)
 # this script transforms OpenAlex data dump files for institution entities to triple form in trig files for SemOpenAlex
+
+# new
+# is_super_system
+# summary_stats: includes twoyearmeancitedness, h-index, i10 index
+# open: from old to do: works_api_url, international. want me to add these?
+
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import DCTERMS, RDF, RDFS, XSD, OWL, FOAF
@@ -165,6 +171,11 @@ related_institution_predicate = URIRef("https://semopenalex.org/ontology/hasAsso
 parent_institution_predicate = URIRef("https://semopenalex.org/ontology/hasParentInstitution")
 child_institution_predicate = URIRef("https://semopenalex.org/ontology/hasChildInstitution")
 year_predicate = URIRef("https://semopenalex.org/ontology/year")
+# new
+is_supsys_predicate = URIRef("https://semopenalex.org/ontology/isSupSys")
+twoyearmeancite_predicate = URIRef("https://semopenalex.org/ontology/twoyearmeancite")
+h_index_predicate = URIRef("https://semopenalex.org/ontology/h_index")
+i10_index_predicate = URIRef("https://semopenalex.org/ontology/i10_index")
 
 # institutions entity context
 context = URIRef("https://semopenalex.org/institutions/context")
@@ -216,6 +227,11 @@ with open(trig_output_file_path, "w", encoding="utf-8") as g:
                     institution_ror = json_data['ror']
                     if not institution_ror is None:
                         institutions_graph.add((institution_uri,ror_predicate,Literal(institution_ror,datatype=XSD.string)))
+                    
+                    # is_super_system
+                    institution_is_supssys = json_data['is_super_system']
+                    if not institution_is_supssys is None:
+                        institutions_graph.add((institution_uri, is_supsys_predicate, Literal(institution_is_supssys, datatype=XSD.boolean)))
 
                     # display_name
                     institution_display_name = json_data['display_name']
@@ -384,6 +400,19 @@ with open(trig_output_file_path, "w", encoding="utf-8") as g:
 
                     # roles
                     # modeled in funders.py and publishers.py
+
+                    institution_twomeancite = json_data.get('summary_stats').get('2yr_mean_citedness')
+                    if not institution_twomeancite is None:
+                        institutions_graph.add((institution_uri,twoyearmeancite_predicate,Literal(institution_twomeancite,datatype=XSD.float)))
+                    
+                    institution_h_index = json_data.get('summary_stats').get('h_index')
+                    if not institution_h_index is None:
+                        institutions_graph.add((institution_uri,h_index_predicate,Literal(institution_h_index,datatype=XSD.integer)))
+                        
+                    institution_i10_index = json_data.get('summary_stats').get('i10_index')
+                    if not institution_i10_index is None:
+                        institutions_graph.add((institution_uri,i10_index_predicate,Literal(institution_i10_index,datatype=XSD.integer)))
+
 
                     i += 1
                     if i % 10000 == 0:
