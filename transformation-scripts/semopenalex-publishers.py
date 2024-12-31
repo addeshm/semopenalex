@@ -1,5 +1,11 @@
 # Copyright Johan Krause, Michael Färber, David Lamprecht; Institute AIFB, Karlsruhe Institute of Technology (KIT)
 # this script transforms OpenAlex data dump files for publisher entities to triple form in trig files for SemOpenAlex
+
+# new
+# image_thumbnail_url (skipped for now as not imp, want me to add?)
+# image_url (skipped for now as not imp, want me to add?)
+# lineage (skipped; info conveyed in child/parent)
+# sources_api_url (added)
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import DCTERMS, RDF, RDFS, XSD, OWL, FOAF
@@ -158,6 +164,7 @@ mean_citedness_predicate = URIRef("https://semopenalex.org/ontology/2YrMeanCited
 h_index_predicate = URIRef("http://purl.org/spar/bido/h-index")
 i10_index_predicate = URIRef("https://semopenalex.org/ontology/i10Index")
 year_predicate = URIRef("https://semopenalex.org/ontology/year")
+url_predicate = URIRef("https://semopenalex.org/ontology/url")
 
 # publishers entity context
 context = URIRef("https://semopenalex.org/publishers/context")
@@ -324,6 +331,12 @@ with open(trig_output_file_path, "w", encoding="utf-8") as g:
                     if not publisher_created_date is None:
                         publisher_graph.add(
                             (publisher_uri, DCTERMS.created, Literal(publisher_created_date, datatype=XSD.date)))
+                        
+                    # sources api url
+                    publisher_sources_api_url = json_data['sources_api_url']
+                    if not publisher_sources_api_url is None:
+                        publisher_sources_api_url = clean_url(publisher_sources_api_url)
+                        publisher_graph.add((publisher_uri, url_predicate, Literal(publisher_sources_api_url, datatype=XSD.string)))
 
                     i += 1
                     if i % 10000 == 0:
