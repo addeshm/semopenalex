@@ -16,6 +16,9 @@ from pathlib import Path
 from botocore import UNSIGNED
 from botocore.config import Config
 
+# new 
+# works_api_url (ask if url predicate is correct)
+
 def get_file_folders(s3_client, bucket_name, prefix=""):
     file_names = []
     folders = []
@@ -157,6 +160,8 @@ i10_index_predicate = URIRef("https://semopenalex.org/ontology/i10Index")
 has_affiliation_predicate = URIRef("https://semopenalex.org/ontology/hasAffiliation")
 has_start_year_predicate = URIRef("https://semopenalex.org/ontology/hasStartYear")
 has_end_year_predicate = URIRef("https://semopenalex.org/ontology/hasEndYear")
+#new
+url_predicate = URIRef("https://semopenalex.org/ontology/url")
 
 # authors entity context
 context = URIRef("https://semopenalex.org/authors/context")
@@ -316,6 +321,12 @@ def transform_gz_file(gz_file_path):
                     author_created_date = json_data['created_date']
                     if not author_created_date is None:
                         author_graph.add((author_uri, DCTERMS.created, Literal(author_created_date, datatype=XSD.date)))
+
+                    author_work_api_url = json_data['works_api_url']
+                    if not author_work_api_url is None:
+                        author_work_api_url = clean_url(author_work_api_url)
+                        author_graph.add((author_uri, url_predicate, Literal(author_work_api_url, datatype=XSD.string)))
+                    
 
                     # affiliations (rdf-star)
                     affiliations = json_data.get('affiliations')
