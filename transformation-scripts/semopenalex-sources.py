@@ -1,5 +1,11 @@
 # Copyright Johan Krause, Michael Färber, David Lamprecht; Institute AIFB, Karlsruhe Institute of Technology (KIT)
 # this script transforms OpenAlex data dump files for source entities to triple form in trig files for SemOpenAlex
+# new
+# host_organization_lineage (skipped as included in publisher)
+# host_organization_name (todo)
+# is_core
+# works_api_url
+# from old to do: societies (want me to add?)
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import DCTERMS, RDF, RDFS, XSD, OWL, FOAF
@@ -175,6 +181,8 @@ has_currency = URIRef("https://semopenalex.org/ontology/hasCurrency")
 has_price_usd = URIRef("https://semopenalex.org/ontology/hasPriceUSD")
 has_provenance = URIRef("https://semopenalex.org/ontology/hasProvenance")
 has_apc = URIRef("https://semopenalex.org/ontology/hasAPC")
+is_core_predicate = URIRef("https://semopenalex.org/ontology/isCore")
+url_predicate = URIRef("https://semopenalex.org/ontology/url")
 
 # sources entity context
 context = URIRef("https://semopenalex.org/sources/context")
@@ -330,6 +338,11 @@ with open(trig_output_file_path, "w", encoding="utf-8") as g:
                     if not source_is_oa is None:
                         source_graph.add((source_uri, is_oa_predicate, Literal(source_is_oa, datatype=XSD.boolean)))
 
+                    # is_core
+                    source_is_core = json_data['is_core']
+                    if not source_is_core is None:
+                        source_graph.add((source_uri, is_core_predicate, Literal(source_is_core, datatype=XSD.boolean)))
+
                     # is_in_doaj
                     source_is_in_doaj = json_data['is_in_doaj']
                     if not source_is_in_doaj is None:
@@ -398,6 +411,11 @@ with open(trig_output_file_path, "w", encoding="utf-8") as g:
                     
                     # societies
                     # todo
+
+                    source_work_api_url = json_data['works_api_url']
+                    if not source_work_api_url is None:
+                        source_work_api_url = clean_url(source_work_api_url)
+                        source_graph.add((source_uri, url_predicate, Literal(source_work_api_url, datatype=XSD.string)))
 
 
                     i += 1
