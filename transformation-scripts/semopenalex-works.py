@@ -1,5 +1,11 @@
 # Copyright Johan Krause, Michael Färber, David Lamprecht; Institute AIFB, Karlsruhe Institute of Technology (KIT)
 # this script transforms OpenAlex data dump files for work entities to triple form in trig files for SemOpenAlex
+# new
+# display_name (seems old and was not added so did not add, want me to add?)
+# fulltext_origin (same)
+# fwci
+# from old to do: cited_by_api_url (want me to add?)
+
 from rdflib import Graph
 from rdflib import URIRef, BNode, Literal
 from rdflib.namespace import DCTERMS, RDF, RDFS, XSD, OWL
@@ -238,6 +244,8 @@ has_primary_location_predicate = URIRef("https://semopenalex.org/ontology/hasPri
 has_best_oa_location_predicate = URIRef("https://semopenalex.org/ontology/hasBestOaLocation")
 pdf_url_predicate = URIRef("https://semopenalex.org/ontology/pdfUrl")
 has_source_predicate = URIRef("https://semopenalex.org/ontology/hasSource")
+## changed 2024
+fwci_predicate = URIRef("https://semopenalex.org/ontology/fwci")
 
 # works entity context
 context = URIRef("https://semopenalex.org/works/context")
@@ -305,6 +313,11 @@ def transform_gz_file(gz_file_path):
                         work_doi = json_data['doi']
                         if not work_doi is None:
                             works_graph.add((work_uri, doi_predicate, Literal(work_doi, datatype=XSD.string)))
+
+                        # fwci
+                        work_fwci = json_data['fwci']
+                        if not work_fwci is None:
+                            work_fwci.add((work_uri, fwci_predicate, Literal(work_fwci, datatype=XSD.float)))
 
                         # title
                         work_title = json_data['title']
